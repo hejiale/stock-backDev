@@ -26,9 +26,14 @@ if (process.env.DB_CA_PATH) {
   const caPath = path.resolve(process.env.DB_CA_PATH);
   if (fs.existsSync(caPath)) {
     sslConfig.ca = fs.readFileSync(caPath);
+    console.log('✅ CA 证书加载成功:', caPath); // 加个成功日志方便调试
   } else {
-    console.warn(`⚠️ 未找到 CA 证书: ${caPath}，将使用系统默认 CA`);
+    // 【修改点】找不到证书直接报错，不要继续连接
+    throw new Error(`❌ 致命错误：找不到 CA 证书文件 ${caPath}。请检查 Dockerfile 是否 COPY 了证书，或 .env 路径是否正确。`);
   }
+} else {
+   // 如果没有配置 DB_CA_PATH，也建议报错，因为 TiDB Cloud 必须用 SSL
+   throw new Error('❌ 致命错误：环境变量 DB_CA_PATH 未配置。TiDB Cloud 必须使用 SSL 连接。');
 }
 
 // 3. 创建 TiDB 数据库连接池
