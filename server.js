@@ -17,24 +17,29 @@ app.use(cors());
 app.use(express.json());
 
 // 2. SSL / CA 配置（TiDB Cloud 公网必须 TLS）
-const sslConfig = {
-  minVersion: 'TLSv1.2',
-  rejectUnauthorized: true
-};
+// 优先从环境变量读取证书内容（Railway 推荐），本地开发则读文件
+let caCert;
 
-if (process.env.DB_CA_PATH) {
-  const caPath = path.resolve(process.env.DB_CA_PATH);
-  if (fs.existsSync(caPath)) {
-    sslConfig.ca = fs.readFileSync(caPath);
-    console.log('✅ CA 证书加载成功:', caPath); // 加个成功日志方便调试
-  } else {
-    // 【修改点】找不到证书直接报错，不要继续连接
-    throw new Error(`❌ 致命错误：找不到 CA 证书文件 ${caPath}。请检查 Dockerfile 是否 COPY 了证书，或 .env 路径是否正确。`);
-  }
+if (process.env.DB_CA_CONTENT) {
+  caCert = process.env.DB_CA_CONTENT.replace(/\\n/g, '\n');
+  console.log('✅ CA 证书从环境变量 DB_CA_CONTENT 加载成功');
 } else {
-   // 如果没有配置 DB_CA_PATH，也建议报错，因为 TiDB Cloud 必须用 SSL
-   throw new Error('❌ 致命错误：环境变量 DB_CA_PATH 未配置。TiDB Cloud 必须使用 SSL 连接。');
+  const certPath = path.join(__dirname, 'certs', 'isrgrootx1.pem');
+  try {
+    caCert = fs.readFileSync(certPath, 'utf8');
+    console.log('✅ CA 证书加载成功:', certPath);
+  } catch (err) {
+    console.error('找不到证书文件，且未配置 DB_CA_CONTENT 环境变量');
+  }
 }
+
+const sslConfig = caCert
+  ? {
+      ca: caCert,
+      minVersion: 'TLSv1.2',
+      rejectUnauthorized: true
+    }
+  : undefined; // 无证书时不传 ssl（仅限本地测试，线上必须配置）
 
 // 3. 创建 TiDB 数据库连接池
 const pool = mysql.createPool({
