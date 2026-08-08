@@ -62,6 +62,6 @@ app.use('/api/health', createHealthRouter());
 app.use('/api/users', createUsersRouter(pool));
 app.use('/api/focus-list', createFocusListRouter(pool));
 
-app.listen(PORT, () => {
-  console.log(`🚀 服务器正在运行: http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });
