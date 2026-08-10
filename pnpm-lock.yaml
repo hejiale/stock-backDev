@@ -17,6 +17,9 @@ importers:
       express:
         specifier: ^4.21.2
         version: 4.22.2
+      iconv-lite:
+        specifier: ^0.7.3
+        version: 0.7.3
       mysql2:
         specifier: ^3.12.0
         version: 3.23.2(@types/node@26.2.0)
