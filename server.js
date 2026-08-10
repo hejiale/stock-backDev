@@ -5,7 +5,6 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const createHealthRouter = require('./routes/health');
 const createUsersRouter = require('./routes/users');
 const createFocusListRouter = require('./routes/focusList');
 
@@ -68,7 +67,6 @@ const pool = mysql.createPool({
 })();
 
 // ================== API 接口路由 ==================
-app.use('/api/health', createHealthRouter());
 app.use('/api/users', createUsersRouter(pool));
 app.use('/api/focus-list', createFocusListRouter(pool));
 
