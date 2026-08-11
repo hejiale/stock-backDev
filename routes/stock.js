@@ -6,7 +6,7 @@ function createStockRouter(pool) {
   const router = express.Router();
 
   // 新增股票
-  router.post('/', async (req, res) => {
+  router.post('/addStock', async (req, res) => {
     const { code, type } = req.body;
     const stockType = Number(type);
 
@@ -59,7 +59,7 @@ function createStockRouter(pool) {
   });
 
   // 删除股票
-  router.delete('/:code', async (req, res) => {
+  router.delete('/deleteStock/:code', async (req, res) => {
     const { code } = req.params;
 
     if (!code || !code.trim()) {
