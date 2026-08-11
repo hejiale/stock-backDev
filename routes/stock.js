@@ -24,6 +24,14 @@ function createStockRouter(pool) {
     const stockCode = code.trim();
 
     try {
+      const [existing] = await pool.query(
+        'SELECT code FROM aStock WHERE code = ? LIMIT 1',
+        [stockCode]
+      );
+      if (existing.length > 0) {
+        return res.status(409).json({ code: 409, message: '该股票已存在，请勿重复添加' });
+      }
+
       await pool.query('INSERT INTO aStock (code, type) VALUES (?, ?)', [stockCode, stockType]);
 
       res.status(201).json({
@@ -33,7 +41,7 @@ function createStockRouter(pool) {
       });
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(409).json({ code: 409, message: '该股票已存在' });
+        return res.status(409).json({ code: 409, message: '该股票已存在，请勿重复添加' });
       }
       res.status(500).json({ code: 500, message: err.message });
     }
