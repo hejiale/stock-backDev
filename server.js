@@ -8,6 +8,7 @@ require('dotenv').config();
 const createUsersRouter = require('./routes/users');
 const createFocusListRouter = require('./routes/focusList');
 const createThirdPartyRouter = require('./routes/thirdParty');
+const createStockRouter = require('./routes/stock');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -71,6 +72,7 @@ const pool = mysql.createPool({
 app.use('/api/users', createUsersRouter(pool));
 app.use('/api/focus-list', createFocusListRouter(pool));
 app.use('/api/third-party', createThirdPartyRouter());
+app.use('/api/stock', createStockRouter(pool));
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
