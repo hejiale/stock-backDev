@@ -1,6 +1,6 @@
 const express = require('express');
 
-const VALID_TYPES = [1, 2, 3, 4]; // 1 A股 2 美股 3 港股 4 韩股
+const VALID_TYPES = [1, 2, 3, 4, 5]; // 1 A股 2 美股 3 港股 4 韩股 5 日股
 
 function createStockRouter(pool) {
   const router = express.Router();
@@ -22,7 +22,7 @@ function createStockRouter(pool) {
     if (!VALID_TYPES.includes(stockType)) {
       return res.status(400).json({
         code: 400,
-        message: 'type 无效，可选值：1 A股、2 美股、3 港股、4 韩股'
+        message: 'type 无效，可选值：1 A股、2 美股、3 港股、4 韩股、5 日股'
       });
     }
 
@@ -67,7 +67,7 @@ function createStockRouter(pool) {
     if (!VALID_TYPES.includes(stockType)) {
       return res.status(400).json({
         code: 400,
-        message: 'type 无效，可选值：1 A股、2 美股、3 港股、4 韩股'
+        message: 'type 无效，可选值：1 A股、2 美股、3 港股、4 韩股、5 日股'
       });
     }
 
