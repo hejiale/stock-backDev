@@ -3,11 +3,18 @@ const express = require('express');
 function createFocusListRouter(pool) {
   const router = express.Router();
 
-  // 查询关注列表
+  // 查询关注列表（按 userId）
   router.get('/', async (req, res) => {
+    const uid = Number(req.query.userId);
+
+    if (!req.query.userId || !Number.isInteger(uid) || uid <= 0) {
+      return res.status(400).json({ code: 400, message: 'userId 不能为空且须为正整数' });
+    }
+
     try {
       const [rows] = await pool.query(
-        'SELECT code, created_at FROM focusList ORDER BY created_at DESC'
+        'SELECT code, created_at, userId FROM focusList WHERE userId = ? ORDER BY created_at DESC',
+        [uid]
       );
       res.json({ code: 200, data: rows });
     } catch (err) {
@@ -17,7 +24,12 @@ function createFocusListRouter(pool) {
 
   // 新增关注
   router.post('/', async (req, res) => {
-    const { code } = req.body;
+    const { code, userId } = req.body;
+    const uid = Number(userId);
+
+    if (!userId || !Number.isInteger(uid) || uid <= 0) {
+      return res.status(400).json({ code: 400, message: 'userId 不能为空且须为正整数' });
+    }
 
     if (!code || typeof code !== 'string' || !code.trim()) {
       return res.status(400).json({ code: 400, message: '股票代码 code 不能为空' });
@@ -27,14 +39,14 @@ function createFocusListRouter(pool) {
 
     try {
       await pool.query(
-        'INSERT INTO focusList (code, created_at) VALUES (?, NOW())',
-        [stockCode]
+        'INSERT INTO focusList (code, created_at, userId) VALUES (?, NOW(), ?)',
+        [stockCode, uid]
       );
 
       res.status(201).json({
         code: 201,
         message: '关注成功',
-        data: { code: stockCode }
+        data: { code: stockCode, userId: uid }
       });
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY') {
@@ -47,6 +59,15 @@ function createFocusListRouter(pool) {
   // 取消关注
   router.delete('/:code', async (req, res) => {
     const { code } = req.params;
+    const uid = Number(req.body.userId ?? req.query.userId);
+
+    if (!req.body.userId && !req.query.userId) {
+      return res.status(400).json({ code: 400, message: 'userId 不能为空且须为正整数' });
+    }
+
+    if (!Number.isInteger(uid) || uid <= 0) {
+      return res.status(400).json({ code: 400, message: 'userId 不能为空且须为正整数' });
+    }
 
     if (!code || !code.trim()) {
       return res.status(400).json({ code: 400, message: '股票代码 code 不能为空' });
@@ -54,8 +75,8 @@ function createFocusListRouter(pool) {
 
     try {
       const [result] = await pool.query(
-        'DELETE FROM focusList WHERE code = ?',
-        [code.trim()]
+        'DELETE FROM focusList WHERE code = ? AND userId = ?',
+        [code.trim(), uid]
       );
       if (result.affectedRows === 0) {
         return res.status(404).json({ code: 404, message: '关注记录未找到' });
