@@ -3,6 +3,18 @@ const express = require('express');
 function createFocusListRouter(pool) {
   const router = express.Router();
 
+  // 查询关注列表
+  router.get('/', async (req, res) => {
+    try {
+      const [rows] = await pool.query(
+        'SELECT code, created_at FROM focusList ORDER BY created_at DESC'
+      );
+      res.json({ code: 200, data: rows });
+    } catch (err) {
+      res.status(500).json({ code: 500, message: err.message });
+    }
+  });
+
   // 新增关注
   router.post('/', async (req, res) => {
     const { code } = req.body;
@@ -14,7 +26,10 @@ function createFocusListRouter(pool) {
     const stockCode = code.trim();
 
     try {
-      await pool.query('INSERT INTO focusList (code) VALUES (?)', [stockCode]);
+      await pool.query(
+        'INSERT INTO focusList (code, created_at) VALUES (?, NOW())',
+        [stockCode]
+      );
 
       res.status(201).json({
         code: 201,
@@ -38,7 +53,10 @@ function createFocusListRouter(pool) {
     }
 
     try {
-      const [result] = await pool.query('DELETE FROM focusList WHERE code = ?', [code.trim()]);
+      const [result] = await pool.query(
+        'DELETE FROM focusList WHERE code = ?',
+        [code.trim()]
+      );
       if (result.affectedRows === 0) {
         return res.status(404).json({ code: 404, message: '关注记录未找到' });
       }
