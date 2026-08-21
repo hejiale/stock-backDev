@@ -32,7 +32,7 @@ function createFocusListRouter(pool) {
     }
 
     if (!code || typeof code !== 'string' || !code.trim()) {
-      return res.status(400).json({ code: 400, message: '股票代码 code 不能为空' });
+      return res.status(400).json({ code: 400, message: '基金代码 code 不能为空' });
     }
 
     const stockCode = code.trim();
@@ -50,7 +50,7 @@ function createFocusListRouter(pool) {
       });
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(409).json({ code: 409, message: '该股票已在关注列表中' });
+        return res.status(409).json({ code: 409, message: '该基金已在关注列表中' });
       }
       res.status(500).json({ code: 500, message: err.message });
     }
@@ -70,7 +70,7 @@ function createFocusListRouter(pool) {
     }
 
     if (!code || !code.trim()) {
-      return res.status(400).json({ code: 400, message: '股票代码 code 不能为空' });
+      return res.status(400).json({ code: 400, message: '基金代码 code 不能为空' });
     }
 
     try {
